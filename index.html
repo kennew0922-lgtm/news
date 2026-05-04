@@ -46,7 +46,7 @@
 
 .right-content {
     /* 右側のニュースエリアを固定 (例: 全体の45%に固定) 🌸 */
-    width: 480px; 
+    width: 460px; 
     flex-shrink: 0; /* 絶対に縮まないように固定します */
     position: sticky;
     top: 60px;
@@ -90,27 +90,35 @@
         }
 
 
-        .gallery {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 15px; margin-bottom: 30px; padding: 15px;
-            border: 1px solid rgba(0, 242, 254, 0.15); background: rgba(255, 255, 255, 0.02);
-        }
-/* 🌸 アイコンリンクの基本設定と光の魔法 */
-        .icon-link img {
-            width: 55px; height: 55px; object-fit: cover;
-            border: 1px solid rgba(0, 242, 254, 0.3); 
-            border-radius: 4px;
-            transition: all 0.3s ease; /* 変化をなめらかにする魔法 🌸 */
-            cursor: pointer;
-        }
+       /* --- ギャラリー（箱）の調整：間隔を半分に 🌸 --- */
+.gallery {
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); /* 枠も少し小さく */
+    gap: 8px;           /* 15pxから約半分に魔法！ */
+    margin-bottom: 20px; 
+    padding: 10px;      /* 中の余白も少しスリムに */
+    border: 1px solid rgba(0, 242, 254, 0.15); 
+    background: rgba(255, 255, 255, 0.02);
+}
 
-        /* 🌸 マウスを乗せた時の反応（ホバー） */
-        .icon-link img:hover {
-            transform: translateY(-2px); /* 若干上に浮き上がります 🌸 */
-            border-color: #00f2fe; /* 縁の色をはっきりさせます 🌸 */
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.8); /* 淵に光を付与します 🌸 */
-            filter: brightness(1.2); /* アイコン自体も少し明るくします 🌸 */
-        }
+/* 🌸 アイコンサイズを2/3に（55px → 36px） 🌸 */
+.icon-link img {
+    width: 36px;        /* 55pxの2/3サイズです✨ */
+    height: 36px; 
+    object-fit: cover;
+    border: 1px solid rgba(0, 242, 254, 0.3); 
+    border-radius: 4px;
+    transition: all 0.3s ease; 
+    cursor: pointer;
+}
+
+/* ホバー時の光もサイズに合わせて微調整 🌸 */
+.icon-link img:hover {
+    transform: translateY(-2px);
+    border-color: #00f2fe;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.8); /* 光も少しシャープに */
+    filter: brightness(1.2);
+}
 
         /* 実用ランチャー側の小さいアイコンも同様に光らせる設定 */
         .utility-launcher .icon-link img {
