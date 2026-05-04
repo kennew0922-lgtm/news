@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Socrarius HP LINK</title>
+    <style>
+        body {
+            background: rgba(0, 5, 15, 0.9);
+            color: #e0f7ff;
+            font-family: 'Consolas', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* 🌸 上部固定バナー */
+        .system-banner {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            height: 40px;
+            background: rgba(0, 105, 217, 0.3);
+            border-bottom: 1px solid #00f2fe;
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+       /* 🌸 左右レイアウトコンテナの調整 */
+.main-layout {
+    display: flex;
+    gap: 30px; /* 少し広めに取ると見やすくなります */
+    margin-top: 60px;
+}
+
+.left-content {
+    /* 左側は残りの幅を全部使う設定 🌸 */
+    flex: 1; 
+    min-width: 0; /* 子要素のはみ出しによる押し出しを防止する魔法 */
+    overflow-y: auto;
+    height: calc(100vh - 80px);
+}
+
+.right-content {
+    /* 右側のニュースエリアを固定 (例: 全体の45%に固定) 🌸 */
+    width: 700px; 
+    flex-shrink: 0; /* 絶対に縮まないように固定します */
+    position: sticky;
+    top: 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+/* 🌸 ニュース項目の調整：折り返しを許可する 🌸 */
+.news-item {
+    /* 以前の nowrap を廃止して、自然に折り返すようにします */
+    white-space: normal; 
+    word-wrap: break-word; /* 長い英単語があっても強制改行 */
+    line-height: 1.5;
+    margin-bottom: 2px;
+
+    font-size: 14px;
+    color: rgba(224, 247, 255, 0.8);
+    border-left: 3px solid transparent;
+    padding: 0px 0px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+
+
+        /* --- 既存のギャラリー等のスタイルは維持 --- */
+        .section-title {
+            background: #000; color: #00f2fe; padding: 10px 20px;
+            margin: 20px 0 5px 0; font-size: 12px; font-weight: bold;
+            border-left: 5px solid #00f2fe; letter-spacing: 3px;
+        }
+
+        /* --- スタイル追加 --- */
+        .section-title2 {
+            background: #000; color: #00f2fe; padding: 10px 20px;
+            margin: 0px 0px 15px; font-size: 12px; font-weight: bold;
+            border-left: 5px solid #00f2fe; letter-spacing: 3px;
+        }
+
+
+        .gallery {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px; margin-bottom: 30px; padding: 15px;
+            border: 1px solid rgba(0, 242, 254, 0.15); background: rgba(255, 255, 255, 0.02);
+        }
+/* 🌸 アイコンリンクの基本設定と光の魔法 */
+        .icon-link img {
+            width: 55px; height: 55px; object-fit: cover;
+            border: 1px solid rgba(0, 242, 254, 0.3); 
+            border-radius: 4px;
+            transition: all 0.3s ease; /* 変化をなめらかにする魔法 🌸 */
+            cursor: pointer;
+        }
+
+        /* 🌸 マウスを乗せた時の反応（ホバー） */
+        .icon-link img:hover {
+            transform: translateY(-2px); /* 若干上に浮き上がります 🌸 */
+            border-color: #00f2fe; /* 縁の色をはっきりさせます 🌸 */
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.8); /* 淵に光を付与します 🌸 */
+            filter: brightness(1.2); /* アイコン自体も少し明るくします 🌸 */
+        }
+
+        /* 実用ランチャー側の小さいアイコンも同様に光らせる設定 */
+        .utility-launcher .icon-link img {
+            width: 35px; height: 35px;
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #345485; }
+
+        /* 🌸 ニュース項目：ホバーで光る魔法 🌸 */
+        .news-item {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            font-size: 14px;
+            color: rgba(224, 247, 255, 0.8);
+            border-left: 3px solid transparent;
+            padding-left: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .news-item:hover {
+            color: #00f2fe;
+            border-left: 3px solid #00f2fe;
+            background: rgba(0, 242, 254, 0.05);
+            padding-left: 15px;
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.5);
+        }
+
+        .loading {
+            opacity: 0.6;
+            font-size: 12px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            50% { opacity: 0.7; }
+            100% { opacity: 0.2; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="system-banner">WORLD NEWS INFORMATION</div>
+
+<div class="main-layout">
+    <!-- 左側：インデックスと各セクション -->
+    <div class="left-content">
+        <div style="font-size: 12px; margin-bottom: 20px; line-height: 1.8;">
+            [INDEX]<br>
+            - <a href="#section1" style="color:#00f2fe;">MAIN STREAM</a><br>
+            - <a href="#section2" style="color:#00f2fe;">ENTERTAINMENT</a><br>
+            - <a href="#section3" style="color:#00f2fe;">SPORTS</a><br>
+            - <a href="#section4" style="color:#00f2fe;">RESOURCES</a>
+        </div>
+
+        <!-- MAIN STREAM セクション -->
+        <div class="section-title" id="section1">MAIN STREAM</div>
+        <div class="gallery">
+            <a href="https://www.cnn.co.jp/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon1.png">
+            </a>
+            <a href="https://jp.reuters.com/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon2.png">
+            </a>
+            <a href="https://www.bbc.com/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon3.png">
+            </a>
+            <a href="https://news.google.com/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon4.png">
+            </a>
+            <a href="https://news.yahoo.co.jp/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon5.png">
+            </a>
+        </div> 
+
+        <!-- ENTERTAINMENT セクション -->
+        <div class="section-title" id="section2">ENTERTAINMENT</div>
+        <div class="gallery">
+            <a href="https://www.imdb.com/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon6.png">
+            </a>
+            <a href="https://animatetimes.com/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon7.png">
+            </a>
+            <a href="https://www.oricon.co.jp/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon8.png">
+            </a>
+            <a href="https://natalie.mu/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon9.png">
+            </a>
+            <a href="https://www.4gamer.net/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon10.png">
+            </a>
+        </div> <!-- ここでまとめて閉じるのが正解です🌸 -->
+
+        <!-- SPORTS セクション -->
+        <div class="section-title" id="section3">SPORTS</div>
+        <div class="gallery">
+            <a href="https://web.gekisaka.jp/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon11.png">
+            </a>
+            <a href="https://the-ans.jp/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon12.png">
+            </a>
+        </div>
+
+        <!-- RESOURCES セクション -->
+        <div class="section-title" id="section4">RESOURCES</div>
+        <div class="gallery">
+            <a href="https://www.gizmodo.jp/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon13.png">
+            </a>
+            <a href="https://pc.watch.impress.co.jp/" target="_blank" class="icon-link">
+                <img src="https://kennew0922-lgtm.github.io/news/icon14.png">
+            </a>
+        </div>
+    </div> <!-- left-contentの閉じ -->
+
+    <!-- 右側：最新ニュース情報 -->
+    <div class="right-content">
+        <!-- ニュース側にはidは不要なので削除してスッキリ！🌸 -->
+        <div class="section-title2">SYSTEM CALL: TOP HEADLINES</div>   
+        <div id="news-terminal">
+            <div id="news-list" class="news-container">
+                <div class="loading">Scanning Global News Waves...</div>
+            </div>
+        </div>
+    </div>
+</div> <!-- main-layoutの閉じ -->
+
+<script>
+        async function fetchNews() {
+            const listContainer = document.getElementById('news-list');
+            try {
+                // GoogleニュースのRSSをJSONに変換して取得
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja');
+                const data = await res.json();
+                
+                let html = "";
+                // 上位8件を表示（用途に合わせて調整してね🌸）
+                data.items.slice(0, 8).forEach(item => {
+                    const cleanTitle = item.title.split(' - ')[0]; // メディア名を除去
+                    html += `
+                        <a href="${item.link}" target="_blank" class="news-item">
+                            ▶ ${cleanTitle}
+                        </a>`;
+                });
+                listContainer.innerHTML = html;
+
+            } catch (e) {
+                console.error("News Link Error:", e);
+                listContainer.innerHTML = `
+                    <div style="color:#ff4136; font-size:11px;">
+                        [LINK ERROR] REASON: ${e.message}
+                    </div>`;
+            }
+        }
+
+        // 起動時にニュースを取得
+        fetchNews();
+        // 15分ごとに自動更新する魔法
+        setInterval(fetchNews, 15 * 60 * 1000);
+    </script>
+
+</body>
+</html>
