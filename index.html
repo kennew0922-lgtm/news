@@ -263,8 +263,8 @@
                 const data = await res.json();
                 
                 let html = "";
-                // 上位15件を表示（用途に合わせて調整してね🌸）
-                data.items.slice(0, 15).forEach(item => {
+                // 上位10件を表示（用途に合わせて調整してね🌸）
+                data.items.slice(0, 10).forEach(item => {
                     const cleanTitle = item.title.split(' - ')[0]; // メディア名を除去
                     html += `
                         <a href="${item.link}" target="_blank" class="news-item">
