@@ -242,6 +242,18 @@
         </div>
     </div> <!-- left-contentの閉じ -->
 
+        <!-- 右側：最新ニュース情報 -->
+    <div class="right-content">
+        <!-- ニュース側にはidは不要なので削除してスッキリ！🌸 -->
+        <div class="section-title2">SYSTEM CALL: TOP HEADLINES</div>   
+        <div id="news-terminal">
+            <div id="news-list" class="news-container">
+                <div class="loading">Scanning Global News Waves...</div>
+            </div>
+        </div>
+    </div>
+</div> <!-- main-layoutの閉じ -->
+
 <script>
         async function fetchNews() {
             const listContainer = document.getElementById('news-list');
