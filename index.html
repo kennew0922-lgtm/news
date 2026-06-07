@@ -255,38 +255,45 @@
 </div> <!-- main-layoutの閉じ -->
 
 <script>
-        async function fetchNews() {
-            const listContainer = document.getElementById('news-list');
-            try {
-                // GoogleニュースのRSSをJSONに変換して取得
-                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja');
-                const data = await res.json();
-                
-                let html = "";
-                // 上位10件を表示（用途に合わせて調整してね🌸）
-                data.items.slice(0, 10).forEach(item => {
-                    const cleanTitle = item.title.split(' - ')[0]; // メディア名を除去
-                    html += `
-                        <a href="${item.link}" target="_blank" class="news-item">
-                            ▶ ${cleanTitle}
-                        </a>`;
-                });
-                listContainer.innerHTML = html;
-
-            } catch (e) {
-                console.error("News Link Error:", e);
-                listContainer.innerHTML = `
-                    <div style="color:#ff4136; font-size:11px;">
-                        [LINK ERROR] REASON: ${e.message}
-                    </div>`;
+    async function fetchNews() {
+        const listContainer = document.getElementById('news-list');
+        try {
+            // GoogleニュースのRSSをJSONに変換して取得
+            const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja');
+            const data = await res.json();
+            
+            // ✨ 安全弁：data や data.items が正常に取得できていない場合、エラーとして処理する
+            if (!data || data.status !== 'ok' || !data.items) {
+                throw new Error("APIサーバーから正常なデータを取得できませんでした。");
             }
-        }
+            
+            let html = "";
+            // 上位10件を表示
+            data.items.slice(0, 10).forEach(item => {
+                const cleanTitle = item.title.split(' - ')[0]; // メディア名を除去
+                html += `
+                    <a href="${item.link}" target="_blank" class="news-item">
+                        ▶ ${cleanTitle}
+                    </a>`;
+            });
+            listContainer.innerHTML = html;
 
-        // 起動時にニュースを取得
-        fetchNews();
-        // 15分ごとに自動更新する魔法
-        setInterval(fetchNews, 15 * 60 * 1000);
-    </script>
+        } catch (e) {
+            console.error("News Link Error:", e);
+            // ✨ 人間用の優しいエラーメッセージ（またはサイバー風にログっぽく見せる）
+            listContainer.innerHTML = `
+                <div style="color:#ff4136; font-size:11px; letter-spacing: 1px;">
+                    [SYSTEM ALERT] NEWS FEED TEMPORARILY OFFLINE.<br>
+                    REASON: DATA FETCH_FAILED
+                </div>`;
+        }
+    }
+
+    // 起動時にニュースを取得
+    fetchNews();
+    // 15分ごとに自動更新する魔法
+    setInterval(fetchNews, 15 * 60 * 1000);
+</script>
 
 </body>
 </html>
