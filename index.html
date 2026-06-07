@@ -258,29 +258,53 @@
     async function fetchNews() {
         const listContainer = document.getElementById('news-list');
         try {
-            // GoogleニュースのRSSをJSONに変換して取得
-            const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja');
+            // 🌐 GoogleニュースのRSSを、強力な無料プロキシ「allorigins」を中継して直接取得
+            const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+            
+            if (!res.ok) throw new Error("ネットワーク通信に失敗しました。");
+            
             const data = await res.json();
             
-            // ✨ 安全弁：data や data.items が正常に取得できていない場合、エラーとして処理する
-            if (!data || data.status !== 'ok' || !data.items) {
-                throw new Error("APIサーバーから正常なデータを取得できませんでした。");
+            // ✨ 安全弁：プロキシから中身（contents）が返ってきていない場合はエラー処理へ
+            if (!data || !data.contents) {
+                throw new Error("プロキシサーバーからデータを取得できませんでした。");
+            }
+            
+            // 🪄 魔法の処理：返ってきた生のXML（RSS）テキストを、JavaScriptで扱えるオブジェクトに変換
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+            
+            // XML内の <item> タグ（各ニュース記事）をすべて抽出
+            const items = xmlDoc.querySelectorAll("item");
+            
+            if (items.length === 0) {
+                throw new Error("ニュース記事が見つかりませんでした。");
             }
             
             let html = "";
-            // 上位10件を表示
-            data.items.slice(0, 10).forEach(item => {
-                const cleanTitle = item.title.split(' - ')[0]; // メディア名を除去
+            // 🎨 上位10件をループ処理してHTMLを組み立てる
+            const maxItems = Math.min(items.length, 10);
+            for (let i = 0; i < maxItems; i++) {
+                const item = items[i];
+                
+                // 各記事のタイトルとリンク先URLを取得
+                const title = item.querySelector("title")?.textContent || "No Title";
+                const link = item.querySelector("link")?.textContent || "#";
+                
+                // 元の処理と同じく、後ろのメディア名（例:「 - 朝日新聞デジタル」など）を除去
+                const cleanTitle = title.split(' - ')[0]; 
+                
                 html += `
-                    <a href="${item.link}" target="_blank" class="news-item">
+                    <a href="${link}" target="_blank" class="news-item">
                         ▶ ${cleanTitle}
                     </a>`;
-            });
+            }
             listContainer.innerHTML = html;
 
         } catch (e) {
             console.error("News Link Error:", e);
-            // ✨ 人間用の優しいエラーメッセージ（またはサイバー風にログっぽく見せる）
+            // 世界観を維持するサイバーなアラートメッセージ
             listContainer.innerHTML = `
                 <div style="color:#ff4136; font-size:11px; letter-spacing: 1px;">
                     [SYSTEM ALERT] NEWS FEED TEMPORARILY OFFLINE.<br>
