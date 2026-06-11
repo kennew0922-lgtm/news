@@ -259,34 +259,30 @@
     async function fetchNews() {
         const listContainer = document.getElementById('news-list');
         try {
-            // 📰 世界一安定している「Yahoo!ニュース（総合トップ）」のRSS電波
-            const yahooRssUrl = 'https://news.yahoo.co.jp/rss/topics/top-headlines.xml';
+            // 🚀 他人のプロキシではなく、ケンくんが作った「自分専用の特使」を呼び出す！
+            // ※もしファイルの位置が違う場合は、ドメインからの絶対パス（例: '/get_news.php'）に調整してね
+            const res = await fetch('./get_news.php');
             
-            // 🚀 最もエラーを起こしにくい「Webtask」系の中継プロキシをダイレクトに使用
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooRssUrl)}`;
-            
-            const res = await fetch(proxyUrl);
             if (!res.ok) throw new Error("SIGNAL_LOST");
             
-            const data = await res.json();
-            if (!data || !data.contents) throw new Error("DATA_EMPTY");
+            const xmlText = await res.text();
             
             // 🪄 届いたデータをXMLオブジェクトに翻訳
             const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
             const items = xmlDoc.querySelectorAll("item");
             
-            if (items.length === 0) throw new Error("ZERO_ITEMS");
+            if (items.length === 0) throw new Error("DATA_EMPTY");
             
             let html = "";
-            // 上位10件をサイバーフォーマットに成形して出力
+            // 上位10件を成形して出力
             const maxItems = Math.min(items.length, 10);
             for (let i = 0; i < maxItems; i++) {
                 const item = items[i];
                 const title = item.querySelector("title")?.textContent || "No Title";
                 const link = item.querySelector("link")?.textContent || "#";
                 
-                // 🌸 Yahoo!ニュース特有の「(XXX新聞)」という末尾の文字を自動で綺麗にカット！
+                // Yahoo!ニュース特有の「(XXX新聞)」という末尾の文字を綺麗にカット！
                 const cleanTitle = title.replace(/\s*\(.*?\)$/, ''); 
                 
                 html += `
@@ -298,12 +294,11 @@
 
         } catch (e) {
             console.error("Socrarius News Error:", e);
-            // エラー時も世界観を崩さないサイバーアラート
             listContainer.innerHTML = `
                 <div style="color:#ff4136; font-size:11px; letter-spacing: 1px; padding-left:10px;">
-                    [SYSTEM ALERT] GLOBAL FEED OFFLINE.<br>
-                    REASON: TRACE_FAILED<br>
-                    STATUS: COCKPIT OVERRIDE REQUIRED.
+                    [SYSTEM ALERT] SYSTEM FEED OFFLINE.<br>
+                    REASON: SATELLITE_CONNECTION_FAILED<br>
+                    STATUS: CHECK 'get_news.php' LOCATION.
                 </div>`;
         }
     }
