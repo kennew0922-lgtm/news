@@ -316,7 +316,7 @@
                 <div style="color:#ff6666; font-size:12px; padding:10px; line-height:1.5;">
                     [SYSTEM ALERT] NEWS FEED OFFLINE<br>
                     REASON: ${e.message}<br>
-                    <span style="font-size:11px; opacity:0.7;">SYSTEM WELL RETRY IN 15 SECONDS</span>
+                    <span style="font-size:11px; opacity:0.7;">SYSTEM WELL RETRY IN 10 SECONDS</span>
                 </div>`;
             
             // 失敗したら10秒後に自動リトライ
@@ -326,17 +326,9 @@
 
     // 初回実行
     window.onload = () => {
-    fetchNews();
-    
-    // 初回失敗しても素早くリトライしたい場合
-    setTimeout(() => {
-        const list = document.getElementById('news-list');
-        if (list.innerHTML.includes('OFFLINE') || list.innerHTML.includes('Scanning')) {
-            fetchNews();
-        }
-    }, 8000);   // 8秒後に強制1回リトライ
-     // 10分ごとに更新（15分→10分に短縮）
-    setInterval(fetchNews, 10 * 60 * 1000);
+        fetchNews();
+        // 10分ごとに更新（15分→10分に短縮）
+        setInterval(fetchNews, 10 * 60 * 1000);
     };
 </script>
 
