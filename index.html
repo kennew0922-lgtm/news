@@ -260,7 +260,7 @@
         const listContainer = document.getElementById('news-list');
         try {
             // 🚀 他人のプロキシではなく、ケンくんが作った「自分専用の特使」を呼び出す！
-            const res = await fetch('http://socrarius.stars.ne.jp/get_news.php');
+            const res = await fetch('https://socrarius.stars.ne.jp/get_news.php');
             
             if (!res.ok) throw new Error("SIGNAL_LOST");
             
