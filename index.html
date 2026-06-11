@@ -260,8 +260,7 @@
         const listContainer = document.getElementById('news-list');
         try {
             // 🚀 他人のプロキシではなく、ケンくんが作った「自分専用の特使」を呼び出す！
-            // ※もしファイルの位置が違う場合は、ドメインからの絶対パス（例: '/get_news.php'）に調整してね
-            const res = await fetch('./get_news.php');
+            const res = await fetch('http://socrarius.stars.ne.jp/get_news.php');
             
             if (!res.ok) throw new Error("SIGNAL_LOST");
             
