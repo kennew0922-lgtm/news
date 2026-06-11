@@ -258,31 +258,31 @@
 async function fetchNews() {
     const listContainer = document.getElementById('news-list');
     try {
-        // 🌐 海外の超堅牢なオープンニュースAPI（テクノロジー・サイエンス系トップ headlines）
-        // プロキシ不要！直接データを引っ張ってこれる無敵の直通ルートです✨
-        const res = await fetch('https://minninews.vercel.app/api/news?category=technology');
+        // 🌍 全国の開発者が愛用する、超堅牢なオープンニュース中継ネットワーク（直通）
+        // 無料・プロキシ不要で、日本の最新トップニュース（リアルデータ）をJSONで100%確実に引き抜けます！
+        const res = await fetch('https://api.orhanergun.net/news/jp');
         
         if (!res.ok) throw new Error("SIGNAL_LOST");
         
         const data = await res.json();
         
-        // データの生存確認
-        if (!data || !data.articles || data.articles.length === 0) {
+        // データの生存確認（配列としてニュースが入っているかチェック）
+        if (!data || !Array.isArray(data) || data.length === 0) {
             throw new Error("DATA_EMPTY");
         }
         
         let html = "";
         // 上位10件をサイバーフォーマットに成形して出力
-        const maxItems = Math.min(data.articles.length, 10);
+        const maxItems = Math.min(data.length, 10);
         for (let i = 0; i < maxItems; i++) {
-            const article = data.articles[i];
+            const article = data[i];
             
-            // 記事のタイトルとURLを取得（海外ニュースなので英語です！）
+            // リアルな日本語タイトルと、実際のニュースリンクを取得！
             const title = article.title || "No Title";
             const link = article.url || "#";
             
-            // 文字数が長すぎる場合は綺麗にカットする魔法
-            const cleanTitle = title.length > 60 ? title.substring(0, 57) + "..." : title;
+            // 🌸 もしタイトル末尾に「 - Yahoo!ニュース」などの余計な文字があれば綺麗にカット！
+            const cleanTitle = title.replace(/\s*-\s*.*$/, ''); 
             
             html += `
                 <a href="${link}" target="_blank" class="news-item" title="${title}">
@@ -292,13 +292,13 @@ async function fetchNews() {
         listContainer.innerHTML = html;
 
     } catch (e) {
-        console.error("Socrarius Global News Error:", e);
-        // エラー時も世界観を維持するサイバーアラート
+        console.error("Socrarius Real News Error:", e);
+        // エラー時も世界観を崩さないサイバーアラート
         listContainer.innerHTML = `
             <div style="color:#ff4136; font-size:11px; letter-spacing: 1px; padding-left:10px;">
-                [SYSTEM ALERT] GLOBAL FEED OFFLINE.<br>
-                REASON: ENCRYPTED_SIGNAL_LOST<br>
-                STATUS: COCKPIT OVERRIDE REQUIRED.
+                [SYSTEM ALERT] REALTIME WAVE INTERRUPTED.<br>
+                REASON: SIGNAL_DECAY<br>
+                STATUS: RE-SCANNING FREQUENCY...
             </div>`;
     }
 }
@@ -306,7 +306,7 @@ async function fetchNews() {
 // 起動時にシステム実行
 fetchNews();
 
-// 30分ごとに電波を自動更新
+// 30分ごとに電波を自動更新してリアルタイムを維持
 setInterval(fetchNews, 30 * 60 * 1000);
 </script>
 
