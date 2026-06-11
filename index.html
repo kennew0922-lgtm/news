@@ -255,59 +255,58 @@
 </div> <!-- main-layoutの閉じ -->
 
 <script>
-   async function fetchNews() {
+async function fetchNews() {
     const listContainer = document.getElementById('news-list');
     try {
-        // 📰 安定しているYahoo!ニュースのRSS
-        const targetUrl = 'https://news.yahoo.co.jp/rss/topics/top-headlines.xml';
-        
-        // 🚀 GitHub（https）からでも100%通信が通る、現在最強の無料プロキシ「cors-analysis」経由
-        // これを通すことで、GitHubから直接Yahoo!のデータを安全に盗み取れます！
-        const res = await fetch(`https://cors-analysis.vercel.app/?url=${encodeURIComponent(targetUrl)}`);
+        // 🌐 海外の超堅牢なオープンニュースAPI（テクノロジー・サイエンス系トップ headlines）
+        // プロキシ不要！直接データを引っ張ってこれる無敵の直通ルートです✨
+        const res = await fetch('https://minninews.vercel.app/api/news?category=technology');
         
         if (!res.ok) throw new Error("SIGNAL_LOST");
         
-        const xmlText = await res.text();
+        const data = await res.json();
         
-        // 🪄 届いたデータをXMLに翻訳
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-        const items = xmlDoc.querySelectorAll("item");
-        
-        if (items.length === 0) throw new Error("DATA_EMPTY");
+        // データの生存確認
+        if (!data || !data.articles || data.articles.length === 0) {
+            throw new Error("DATA_EMPTY");
+        }
         
         let html = "";
-        // 上位10件を成形して出力
-        const maxItems = Math.min(items.length, 10);
+        // 上位10件をサイバーフォーマットに成形して出力
+        const maxItems = Math.min(data.articles.length, 10);
         for (let i = 0; i < maxItems; i++) {
-            const item = items[i];
-            const title = item.querySelector("title")?.textContent || "No Title";
-            const link = item.querySelector("link")?.textContent || "#";
+            const article = data.articles[i];
             
-            // Yahoo!ニュースの末尾の「(新聞名)」をカット
-            const cleanTitle = title.replace(/\s*\(.*?\)$/, ''); 
+            // 記事のタイトルとURLを取得（海外ニュースなので英語です！）
+            const title = article.title || "No Title";
+            const link = article.url || "#";
+            
+            // 文字数が長すぎる場合は綺麗にカットする魔法
+            const cleanTitle = title.length > 60 ? title.substring(0, 57) + "..." : title;
             
             html += `
-                <a href="${link}" target="_blank" class="news-item">
+                <a href="${link}" target="_blank" class="news-item" title="${title}">
                     ▶ ${cleanTitle}
                 </a>`;
         }
         listContainer.innerHTML = html;
 
     } catch (e) {
-        console.error("Socrarius GitHub News Error:", e);
+        console.error("Socrarius Global News Error:", e);
+        // エラー時も世界観を維持するサイバーアラート
         listContainer.innerHTML = `
             <div style="color:#ff4136; font-size:11px; letter-spacing: 1px; padding-left:10px;">
-                [SYSTEM ALERT] GITHUB LINK OFFLINE.<br>
-                REASON: CORS_PROXY_DISCONNECTED<br>
-                STATUS: ENCRYPTED_SIGNAL_BLOCKED
+                [SYSTEM ALERT] GLOBAL FEED OFFLINE.<br>
+                REASON: ENCRYPTED_SIGNAL_LOST<br>
+                STATUS: COCKPIT OVERRIDE REQUIRED.
             </div>`;
     }
 }
 
-// 起動
+// 起動時にシステム実行
 fetchNews();
-// 30分ごとに自動更新
+
+// 30分ごとに電波を自動更新
 setInterval(fetchNews, 30 * 60 * 1000);
 </script>
 
