@@ -256,57 +256,60 @@
 
 
 <script>
-    async function fetchNews() {
-        const listContainer = document.getElementById('news-list');
-        try {
-            // 🚀 他人のプロキシではなく、ケンくんが作った「自分専用の特使」を呼び出す！
-            const res = await fetch('/get_news.php');
+async function fetchNews() {
+    const listContainer = document.getElementById('news-list');
+    try {
+        // 📰 安定しているYahoo!ニュースのRSS
+        const targetUrl = 'https://news.yahoo.co.jp/rss/topics/top-headlines.xml';
+        
+        // 🚀 GitHub（https）からでも100%通信が通る、現在最強の無料プロキシ「cors-analysis」経由
+        // これを通すことで、GitHubから直接Yahoo!のデータを安全に盗み取れます！
+        const res = await fetch(`https://cors-analysis.vercel.app/?url=${encodeURIComponent(targetUrl)}`);
+        
+        if (!res.ok) throw new Error("SIGNAL_LOST");
+        
+        const xmlText = await res.text();
+        
+        // 🪄 届いたデータをXMLに翻訳
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        const items = xmlDoc.querySelectorAll("item");
+        
+        if (items.length === 0) throw new Error("DATA_EMPTY");
+        
+        let html = "";
+        // 上位10件を成形して出力
+        const maxItems = Math.min(items.length, 10);
+        for (let i = 0; i < maxItems; i++) {
+            const item = items[i];
+            const title = item.querySelector("title")?.textContent || "No Title";
+            const link = item.querySelector("link")?.textContent || "#";
             
-            if (!res.ok) throw new Error("SIGNAL_LOST");
+            // Yahoo!ニュースの末尾の「(新聞名)」をカット
+            const cleanTitle = title.replace(/\s*\(.*?\)$/, ''); 
             
-            const xmlText = await res.text();
-            
-            // 🪄 届いたデータをXMLオブジェクトに翻訳
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-            const items = xmlDoc.querySelectorAll("item");
-            
-            if (items.length === 0) throw new Error("DATA_EMPTY");
-            
-            let html = "";
-            // 上位10件を成形して出力
-            const maxItems = Math.min(items.length, 10);
-            for (let i = 0; i < maxItems; i++) {
-                const item = items[i];
-                const title = item.querySelector("title")?.textContent || "No Title";
-                const link = item.querySelector("link")?.textContent || "#";
-                
-                // Yahoo!ニュース特有の「(XXX新聞)」という末尾の文字を綺麗にカット！
-                const cleanTitle = title.replace(/\s*\(.*?\)$/, ''); 
-                
-                html += `
-                    <a href="${link}" target="_blank" class="news-item">
-                        ▶ ${cleanTitle}
-                    </a>`;
-            }
-            listContainer.innerHTML = html;
-
-        } catch (e) {
-            console.error("Socrarius News Error:", e);
-            listContainer.innerHTML = `
-                <div style="color:#ff4136; font-size:11px; letter-spacing: 1px; padding-left:10px;">
-                    [SYSTEM ALERT] SYSTEM FEED OFFLINE.<br>
-                    REASON: SATELLITE_CONNECTION_FAILED<br>
-                    STATUS: CHECK 'get_news.php' LOCATION.
-                </div>`;
+            html += `
+                <a href="${link}" target="_blank" class="news-item">
+                    ▶ ${cleanTitle}
+                </a>`;
         }
-    }
+        listContainer.innerHTML = html;
 
-    // 起動時にシステム実行
-    fetchNews();
-    
-    // 30分ごとに電波を自動更新
-    setInterval(fetchNews, 30 * 60 * 1000);
+    } catch (e) {
+        console.error("Socrarius GitHub News Error:", e);
+        listContainer.innerHTML = `
+            <div style="color:#ff4136; font-size:11px; letter-spacing: 1px; padding-left:10px;">
+                [SYSTEM ALERT] GITHUB LINK OFFLINE.<br>
+                REASON: CORS_PROXY_DISCONNECTED<br>
+                STATUS: ENCRYPTED_SIGNAL_BLOCKED
+            </div>`;
+    }
+}
+
+// 起動
+fetchNews();
+// 30分ごとに自動更新
+setInterval(fetchNews, 30 * 60 * 1000);
 </script>
 
 
