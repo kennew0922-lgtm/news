@@ -259,39 +259,35 @@
     async function fetchNews() {
         const listContainer = document.getElementById('news-list');
         try {
-            // 🌐 Googleニュースの日本語トップ headlines RSS
-            const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
+            // 📰 世界一安定している「Yahoo!ニュース（総合トップ）」のRSS電波
+            const yahooRssUrl = 'https://news.yahoo.co.jp/rss/topics/top-headlines.xml';
             
-            // 🚀 超高速・安定な無料プロキシ「corsproxy.io」を中継させてセキュリティ（CORS）を突破！
-            const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+            // 🚀 最もエラーを起こしにくい「Webtask」系の中継プロキシをダイレクトに使用
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooRssUrl)}`;
             
-            if (!res.ok) throw new Error("通信に失敗しました。");
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error("SIGNAL_LOST");
             
-            // テキストとしてXML（RSSデータ）をそのまま受け取る
-            const xmlText = await res.text();
+            const data = await res.json();
+            if (!data || !data.contents) throw new Error("DATA_EMPTY");
             
-            // 🪄 生のXMLテキストを、JavaScriptが解読できるオブジェクトに変換
+            // 🪄 届いたデータをXMLオブジェクトに翻訳
             const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-            
-            // 記事の塊（<item>タグ）を抽出
+            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
             const items = xmlDoc.querySelectorAll("item");
             
-            if (items.length === 0) {
-                throw new Error("ニュース記事が0件です。");
-            }
+            if (items.length === 0) throw new Error("ZERO_ITEMS");
             
             let html = "";
-            // 上位10件をループ処理
+            // 上位10件をサイバーフォーマットに成形して出力
             const maxItems = Math.min(items.length, 10);
             for (let i = 0; i < maxItems; i++) {
                 const item = items[i];
-                
                 const title = item.querySelector("title")?.textContent || "No Title";
                 const link = item.querySelector("link")?.textContent || "#";
                 
-                // 後ろのメディア名（例:「 - 朝日新聞デジタル」など）を綺麗にカット
-                const cleanTitle = title.split(' - ')[0]; 
+                // 🌸 Yahoo!ニュース特有の「(XXX新聞)」という末尾の文字を自動で綺麗にカット！
+                const cleanTitle = title.replace(/\s*\(.*?\)$/, ''); 
                 
                 html += `
                     <a href="${link}" target="_blank" class="news-item">
@@ -301,22 +297,22 @@
             listContainer.innerHTML = html;
 
         } catch (e) {
-            console.error("News Fetch Error:", e);
-            // サイバー感あふれるエラーアラート
+            console.error("Socrarius News Error:", e);
+            // エラー時も世界観を崩さないサイバーアラート
             listContainer.innerHTML = `
                 <div style="color:#ff4136; font-size:11px; letter-spacing: 1px; padding-left:10px;">
-                    [SYSTEM ALERT] NEWS FEED OFFLINE.<br>
-                    REASON: SIGNAL_FETCH_FAILED<br>
-                    STATUS: RETRYING IN 15M...
+                    [SYSTEM ALERT] GLOBAL FEED OFFLINE.<br>
+                    REASON: TRACE_FAILED<br>
+                    STATUS: COCKPIT OVERRIDE REQUIRED.
                 </div>`;
         }
     }
 
-    // 起動時にニュースを受信開始！
+    // 起動時にシステム実行
     fetchNews();
     
-    // 15分ごとに自動更新するループ
-    setInterval(fetchNews, 15 * 60 * 1000);
+    // 30分ごとに電波を自動更新
+    setInterval(fetchNews, 30 * 60 * 1000);
 </script>
 
 
