@@ -254,7 +254,8 @@
     </div>
 </div> <!-- main-layoutの閉じ -->
 
-<script>
+<!-- 一旦封印　効果切れたから -->
+　<!--　<script>
     async function fetchNews() {
         const listContainer = document.getElementById('news-list');
         try {
@@ -317,7 +318,43 @@
     fetchNews();
     // 15分ごとに自動更新する魔法
     setInterval(fetchNews, 15 * 60 * 1000);
-</script>
+</script> -->
+
+
+<!-- ✨自分専用　後で移設　【NewsAPI用のスクリプトコード】✨ -->
+    <script>
+
+        async function fetchNews() {
+    const listContainer = document.getElementById('news-list');
+    try {
+        // 🔑 YOUR_API_KEY の部分を、手に入れた鍵に書き換えてね！
+        const apiKey = 'ae280cefc22146d9bfae128ee5e7cb91'; 
+        // 日本のトップニュースを取得するURL
+        const res = await fetch(`https://newsapi.org/v2/top-headlines?country=jp&apiKey=${apiKey}`);
+        const data = await res.json();
+        
+        if (data.status !== 'ok' || !data.articles) {
+            throw new Error("NewsAPIの認証に失敗したか、制限に達しました。");
+        }
+        
+        let html = "";
+        // 上位10件を表示
+        data.articles.slice(0, 10).forEach(article => {
+            html += `
+                <a href="${article.url}" target="_blank" class="news-item">
+                    ▶ ${article.title}
+                </a>`;
+        });
+        listContainer.innerHTML = html;
+
+    } catch (e) {
+        console.error("NewsAPI Error:", e);
+        listContainer.innerHTML = `<div style="color:#ff4136; font-size:11px;">[NEWS LINK ERROR]</div>`;
+    }
+}
+
+    </script>
+
 
 </body>
 </html>
