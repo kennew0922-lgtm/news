@@ -264,113 +264,51 @@
     </div> <!-- left-contentの閉じ -->
 
         <!-- 右側：最新ニュース情報 -->
-  <div class="right-content">
-        <div class="section-title2">SYSTEM CALL: MARKET MONITOR</div>   
-        <div id="market-terminal" style="background: rgba(10, 0, 20, 0.6); border: 1px solid #bc00dd; padding: 10px; margin-bottom: 15px; font-family: monospace; font-size: 13px; color: #cc66ff; border-radius: 4px; box-shadow: 0 0 8px rgba(188, 0, 221, 0.2);">
-            <div id="market-list" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <div class="loading" style="color: #cc66ff;">Scanning Market Signals...</div>
-            </div>
-        </div>
+    <div class="right-content">
+        <!-- ニュース側にはidは不要なので削除してスッキリ！🌸 -->
+        <div class="section-title2">SYSTEM CALL: TOP HEADLINES</div> 
 
-        <div class="section-title2">SYSTEM CALL: TOP HEADLINES</div>   
+         <img src="https://socrarius-tool.com/news/banner1.png"> 
+         <br>
         <div id="news-terminal">
             <div id="news-list" class="news-container">
                 <div class="loading">Scanning Global News Waves...</div>
             </div>
         </div>
     </div>
+</div> <!-- main-layoutの閉じ -->
 
 <script>
-    // 🌸 紫基調（サイバーパープル）＆絶対防衛魔法版：マーケットモニター取得関数
-    async function fetchMarketData() {
-        const marketContainer = document.getElementById('market-list');
-        
-        try {
-            // 1. まずはドル円の為替レート（CORSフリー・登録不要の超安定オープンAPIから直接フェッチ）
-            const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
-            if (!fxRes.ok) throw new Error("FX API Error");
-            const fxData = await fxRes.json();
-            const jpyRate = fxData.rates?.JPY; // 1ドルあたりの円
-
-            // 2. 日経平均とダウ（ベース値）
-            const baseNikkei = 38500;
-            const baseDow = 39200;
-            
-            // 為替の動きに合わせてちょっとだけ上下させるリアルな演出
-            const calculatedNikkei = jpyRate ? baseNikkei + ((jpyRate - 150) * 100) : baseNikkei;
-            const calculatedDow = baseDow + (Math.sin(Date.now() / 10000) * 50);
-
-            // 前日比をそれっぽく自動生成する魔法
-            const mockChange = (val) => {
-                const seed = (Math.floor(val) % 100) / 100;
-                return (seed * 2 - 0.8); // -0.8% 〜 +1.2% の間でリアルに変動
-            };
-
-            const usdjpyChange = fxData.rates ? 0.12 : -0.05; 
-            const nikkeiChange = mockChange(calculatedNikkei);
-            const dowChange = mockChange(calculatedDow);
-
-            // 🌸 パーツを描画する内部関数（紫基調ネオンデザイン）
-            const getPriceHTML = (label, price, changePercent) => {
-                const sign = changePercent >= 0 ? "+" : "";
-                const color = changePercent >= 0 ? "#33ff66" : "#ff4444"; // 値動きの緑・赤は視認性のため維持
-                
-                return `
-                    <div style="flex: 1; min-width: 100px; padding: 6px 10px; background: rgba(15, 0, 30, 0.5); border: 1px solid rgba(188, 0, 221, 0.3); border-left: 4px solid #bc00dd; border-radius: 3px;">
-                        <span style="font-size: 11px; color: #cc66ff; opacity: 0.8; display: block; font-weight: bold;">${label}</span>
-                        <strong style="font-size: 14px; color: #ffffff;">${typeof price === 'number' ? price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : price}</strong> 
-                        <span style="color: ${color}; font-size: 11px; margin-left: 4px; font-weight: bold;">(${sign}${changePercent.toFixed(2)}%)</span>
-                    </div>`;
-            };
-            
-            let html = "";
-            html += getPriceHTML("USD/JPY", jpyRate ? jpyRate : 156.42, usdjpyChange);
-            html += getPriceHTML("NIKKEI 225", Math.floor(calculatedNikkei), nikkeiChange);
-            html += getPriceHTML("NY DOW", Math.floor(calculatedDow), dowChange);
-            
-            marketContainer.innerHTML = html;
-            
-        } catch (e) {
-            console.error("Market Fetch Error:", e);
-            // 🌸 【絶対防衛バリア】万が一通信エラーになっても、画面を壊さず最高に格好いいネオンパープルで埋め尽くすオーバーライド演出！
-            marketContainer.innerHTML = `
-                <div style="flex: 1; min-width: 100px; padding: 6px 10px; background: rgba(15, 0, 30, 0.5); border: 1px solid rgba(188, 0, 221, 0.4); border-left: 4px solid #bc00dd; border-radius: 3px;">
-                    <span style="font-size: 11px; color: #cc66ff; opacity: 0.8; display: block; font-weight: bold;">USD/JPY [OVERRIDE]</span>
-                    <strong style="font-size: 14px; color: #ffffff;">¥156.42</strong> <span style="color: #33ff66; font-size: 11px; font-weight: bold;">(+0.15%)</span>
-                </div>
-                <div style="flex: 1; min-width: 100px; padding: 6px 10px; background: rgba(15, 0, 30, 0.5); border: 1px solid rgba(188, 0, 221, 0.4); border-left: 4px solid #bc00dd; border-radius: 3px;">
-                    <span style="font-size: 11px; color: #cc66ff; opacity: 0.8; display: block; font-weight: bold;">NIKKEI 225 [OVERRIDE]</span>
-                    <strong style="font-size: 14px; color: #ffffff;">38,620</strong> <span style="color: #33ff66; font-size: 11px; font-weight: bold;">(+0.42%)</span>
-                </div>
-                <div style="flex: 1; min-width: 100px; padding: 6px 10px; background: rgba(15, 0, 30, 0.5); border: 1px solid rgba(188, 0, 221, 0.4); border-left: 4px solid #bc00dd; border-radius: 3px;">
-                    <span style="font-size: 11px; color: #cc66ff; opacity: 0.8; display: block; font-weight: bold;">NY DOW [OVERRIDE]</span>
-                    <strong style="font-size: 14px; color: #ffffff;">39,124</strong> <span style="color: #ff4444; font-size: 11px; font-weight: bold;">(-0.12%)</span>
-                </div>`;
-        }
-    }
-
-    // ニュース取得関数（元のロジックのまま無傷で維持しています🌸）
     async function fetchNews() {
         const listContainer = document.getElementById('news-list');
         listContainer.innerHTML = '<div class="loading">Scanning Global News Waves...</div>';
 
         try {
+            // より安定した代替RSS（Yahooニュース日本版トップ）
+            // const targetUrl = 'https://news.yahoo.co.jp/rss/topics/top-picks.xml';
+            
+            // またはGoogle News（allorigins経由）
             const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
+            
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
             const res = await fetch(proxyUrl, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
-                cache: 'no-store'
+                cache: 'no-store'   // キャッシュを無効化して最新を取得しやすく
             });
 
             if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
             const data = await res.json();
-            if (!data || !data.contents) throw new Error("Proxy returned no content");
+            
+            if (!data || !data.contents) {
+                throw new Error("Proxy returned no content");
+            }
 
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(data.contents, "text/xml");
 
+            // エラーチェック（GoogleがXMLを返さなかった場合）
             const parseError = xmlDoc.querySelector('parsererror');
             if (parseError) throw new Error("XML Parse Error");
 
@@ -378,13 +316,14 @@
             if (items.length === 0) throw new Error("No items found");
 
             let html = "";
-            const maxItems = Math.min(items.length, 12);
+            const maxItems = Math.min(items.length, 12); // 12件に増やしてもOK
 
             for (let i = 0; i < maxItems; i++) {
                 const item = items[i];
                 let title = item.querySelector("title")?.textContent || "No Title";
                 const link = item.querySelector("link")?.textContent || "#";
 
+                // ソース名除去（「 - 朝日新聞」など）
                 title = title.split(' - ')[0].trim();
 
                 html += `
@@ -401,23 +340,19 @@
                 <div style="color:#ff6666; font-size:12px; padding:10px; line-height:1.5;">
                     [SYSTEM ALERT] NEWS FEED OFFLINE<br>
                     REASON: ${e.message}<br>
-                    <span style="font-size:11px; opacity:0.7;">SYSTEM WILL RETRY IN 10 SECONDS</span>
+                    <span style="font-size:11px; opacity:0.7;">SYSTEM WELL RETRY IN 10 SECONDS</span>
                 </div>`;
             
+            // 失敗したら10秒後に自動リトライ
             setTimeout(fetchNews, 10000);
         }
     }
 
-    // 初回実行イベント登録
+    // 初回実行
     window.onload = () => {
-        fetchMarketData(); // 🌸 マーケット情報を紫ネオンでフェッチ！
-        fetchNews();       // ニュースをフェッチ！
-        
-        // 10分ごとに両方更新
-        setInterval(() => {
-            fetchMarketData();
-            fetchNews();
-        }, 10 * 60 * 1000);
+        fetchNews();
+        // 10分ごとに更新（15分→10分に短縮）
+        setInterval(fetchNews, 10 * 60 * 1000);
     };
 </script>
 
