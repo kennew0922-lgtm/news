@@ -264,8 +264,14 @@
     </div> <!-- left-contentの閉じ -->
 
         <!-- 右側：最新ニュース情報 -->
-    <div class="right-content">
-        <!-- ニュース側にはidは不要なので削除してスッキリ！🌸 -->
+   <div class="right-content">
+        <div class="section-title2">SYSTEM CALL: MARKET MONITOR</div>   
+        <div id="market-terminal" style="background: rgba(0, 10, 5, 0.6); border: 1px solid #33ff66; padding: 10px; margin-bottom: 15px; font-family: monospace; font-size: 13px; color: #33ff66; border-radius: 4px;">
+            <div id="market-list" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div class="loading">Scanning Market Signals...</div>
+            </div>
+        </div>
+
         <div class="section-title2">SYSTEM CALL: TOP HEADLINES</div>   
         <div id="news-terminal">
             <div id="news-list" class="news-container">
@@ -273,39 +279,83 @@
             </div>
         </div>
     </div>
-</div> <!-- main-layoutの閉じ -->
 
 <script>
+    // 🌸 追加：株価と為替（ドル円・日経平均・ダウ）を一瞬でパッと取得する魔法
+    async function fetchMarketData() {
+        const marketContainer = document.getElementById('market-list');
+        
+        try {
+            // Yahoo Financeの公式パブリック軽量API（プロキシ不要・爆速）
+            // USD/JPY(ドル円), ^N225(日経平均), ^DJI(NYダウ)
+            const targetUrl = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=JPY=X,^N225,^DJI';
+            
+            const res = await fetch(targetUrl, { cache: 'no-store' });
+            if (!res.ok) throw new Error("Market API Error");
+            
+            const data = await res.json();
+            const quotes = data.quoteResponse?.result;
+            
+            if (!quotes || quotes.length === 0) throw new Error("No Market Data");
+            
+            // データをそれぞれのシンボルごとに整理
+            const usdjpy = quotes.find(q => q.symbol === 'JPY=X');
+            const nikkei = quotes.find(q => q.symbol === '^N225');
+            const dow = quotes.find(q => q.symbol === '^DJI');
+            
+            // 前日比によって色を変える演出（プラスなら緑/そのまま、マイナスなら赤っぽくなど、今回はサイバー感優先）
+            const getPriceHTML = (label, quote, isCurrency = false) => {
+                if (!quote) return `<div>${label}: N/A</div>`;
+                const price = quote.regularMarketPrice;
+                const changePercent = quote.regularMarketChangePercent;
+                const sign = changePercent >= 0 ? "+" : "";
+                const color = changePercent >= 0 ? "#33ff66" : "#ff4444"; // プラスは緑、マイナスは赤
+                
+                // ドル円なら小数点2桁、株価ならカンマ区切り
+                const formattedPrice = isCurrency ? price.toFixed(2) : Math.floor(price).toLocaleString();
+                
+                return `
+                    <div style="flex: 1; min-width: 100px; padding: 4px 8px; background: rgba(0, 30, 10, 0.4); border-left: 3px solid ${color};">
+                        <span style="font-size: 11px; opacity: 0.7; block;">${label}</span><br>
+                        <strong style="font-size: 14px;">${isCurrency ? '¥' : ''}${formattedPrice}</strong> 
+                        <span style="color: ${color}; font-size: 11px;">(${sign}${changePercent.toFixed(2)}%)</span>
+                    </div>`;
+            };
+            
+            let html = "";
+            html += getPriceHTML("USD/JPY", usdjpy, true);
+            html += getPriceHTML("NIKKEI 225", nikkei, false);
+            html += getPriceHTML("NY DOW", dow, false);
+            
+            marketContainer.innerHTML = html;
+            
+        } catch (e) {
+            console.error("Market Fetch Error:", e);
+            marketContainer.innerHTML = `<div style="color:#ffaa00; font-size:11px;">[MARKET DATA TEMPORARILY OFFLINE]</div>`;
+        }
+    }
+
     async function fetchNews() {
         const listContainer = document.getElementById('news-list');
         listContainer.innerHTML = '<div class="loading">Scanning Global News Waves...</div>';
 
         try {
-            // より安定した代替RSS（Yahooニュース日本版トップ）
-            // const targetUrl = 'https://news.yahoo.co.jp/rss/topics/top-picks.xml';
-            
-            // またはGoogle News（allorigins経由）
             const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
-            
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
             const res = await fetch(proxyUrl, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
-                cache: 'no-store'   // キャッシュを無効化して最新を取得しやすく
+                cache: 'no-store'
             });
 
             if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
             const data = await res.json();
-            
-            if (!data || !data.contents) {
-                throw new Error("Proxy returned no content");
-            }
+            if (!data || !data.contents) throw new Error("Proxy returned no content");
 
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(data.contents, "text/xml");
 
-            // エラーチェック（GoogleがXMLを返さなかった場合）
             const parseError = xmlDoc.querySelector('parsererror');
             if (parseError) throw new Error("XML Parse Error");
 
@@ -313,14 +363,13 @@
             if (items.length === 0) throw new Error("No items found");
 
             let html = "";
-            const maxItems = Math.min(items.length, 12); // 12件に増やしてもOK
+            const maxItems = Math.min(items.length, 12);
 
             for (let i = 0; i < maxItems; i++) {
                 const item = items[i];
                 let title = item.querySelector("title")?.textContent || "No Title";
                 const link = item.querySelector("link")?.textContent || "#";
 
-                // ソース名除去（「 - 朝日新聞」など）
                 title = title.split(' - ')[0].trim();
 
                 html += `
@@ -337,19 +386,23 @@
                 <div style="color:#ff6666; font-size:12px; padding:10px; line-height:1.5;">
                     [SYSTEM ALERT] NEWS FEED OFFLINE<br>
                     REASON: ${e.message}<br>
-                    <span style="font-size:11px; opacity:0.7;">SYSTEM WELL RETRY IN 10 SECONDS</span>
+                    <span style="font-size:11px; opacity:0.7;">SYSTEM WILL RETRY IN 10 SECONDS</span>
                 </div>`;
             
-            // 失敗したら10秒後に自動リトライ
             setTimeout(fetchNews, 10000);
         }
     }
 
     // 初回実行
     window.onload = () => {
-        fetchNews();
-        // 10分ごとに更新（15分→10分に短縮）
-        setInterval(fetchNews, 10 * 60 * 1000);
+        fetchMarketData(); // 🌸 株価をフェッチ！
+        fetchNews();       // ニュースをフェッチ！
+        
+        // 10分ごとに両方更新
+        setInterval(() => {
+            fetchMarketData();
+            fetchNews();
+        }, 10 * 60 * 1000);
     };
 </script>
 
