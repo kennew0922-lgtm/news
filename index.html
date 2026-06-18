@@ -335,61 +335,61 @@
         }
     }
 
-    async function fetchNews() {
-        const listContainer = document.getElementById('news-list');
-        listContainer.innerHTML = '<div class="loading">Scanning Global News Waves...</div>';
-
+// 🌸 修正版：CORS制限を突破して株価・為替を一瞬でパッと取得する魔法
+    async function fetchMarketData() {
+        const marketContainer = document.getElementById('market-list');
+        
         try {
-            const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
+            // Yahoo Financeの公式パブリック軽量API（CORS回避のためにalloriginsを経由させます！）
+            const targetUrl = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=JPY=X,^N225,^DJI';
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-            const res = await fetch(proxyUrl, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' },
-                cache: 'no-store'
-            });
-
-            if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-
-            const data = await res.json();
-            if (!data || !data.contents) throw new Error("Proxy returned no content");
-
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-
-            const parseError = xmlDoc.querySelector('parsererror');
-            if (parseError) throw new Error("XML Parse Error");
-
-            const items = xmlDoc.querySelectorAll("item");
-            if (items.length === 0) throw new Error("No items found");
-
-            let html = "";
-            const maxItems = Math.min(items.length, 12);
-
-            for (let i = 0; i < maxItems; i++) {
-                const item = items[i];
-                let title = item.querySelector("title")?.textContent || "No Title";
-                const link = item.querySelector("link")?.textContent || "#";
-
-                title = title.split(' - ')[0].trim();
-
-                html += `
-                    <a href="${link}" target="_blank" class="news-item" title="${title}">
-                        ▶ ${title}
-                    </a>`;
-            }
-
-            listContainer.innerHTML = html;
-
-        } catch (e) {
-            console.error("News Fetch Error:", e);
-            listContainer.innerHTML = `
-                <div style="color:#ff6666; font-size:12px; padding:10px; line-height:1.5;">
-                    [SYSTEM ALERT] NEWS FEED OFFLINE<br>
-                    REASON: ${e.message}<br>
-                    <span style="font-size:11px; opacity:0.7;">SYSTEM WILL RETRY IN 10 SECONDS</span>
-                </div>`;
             
-            setTimeout(fetchNews, 10000);
+            const res = await fetch(proxyUrl, { cache: 'no-store' });
+            if (!res.ok) throw new Error("Market API Error");
+            
+            const jsonWrapper = await res.json();
+            
+            // alloriginsから返ってきた中身（contents）をJSONとしてパース
+            if (!jsonWrapper || !jsonWrapper.contents) throw new Error("No Proxy Content");
+            const data = JSON.parse(jsonWrapper.contents);
+            
+            const quotes = data.quoteResponse?.result;
+            if (!quotes || quotes.length === 0) throw new Error("No Market Data");
+            
+            // データをそれぞれのシンボルごとに整理
+            const usdjpy = quotes.find(q => q.symbol === 'JPY=X');
+            const nikkei = quotes.find(q => q.symbol === '^N225');
+            const dow = quotes.find(q => q.symbol === '^DJI');
+            
+            // 前日比によって色を変える演出
+            const getPriceHTML = (label, quote, isCurrency = false) => {
+                if (!quote) return `<div>${label}: N/A</div>`;
+                const price = quote.regularMarketPrice;
+                const changePercent = quote.regularMarketChangePercent;
+                const sign = changePercent >= 0 ? "+" : "";
+                const color = changePercent >= 0 ? "#33ff66" : "#ff4444"; // プラスは緑、マイナスは赤
+                
+                // ドル円なら小数点2桁、株価ならカンマ区切り
+                const formattedPrice = isCurrency ? price.toFixed(2) : Math.floor(price).toLocaleString();
+                
+                return `
+                    <div style="flex: 1; min-width: 100px; padding: 4px 8px; background: rgba(0, 30, 10, 0.4); border-left: 3px solid ${color};">
+                        <span style="font-size: 11px; opacity: 0.7; display: block;">${label}</span>
+                        <strong style="font-size: 14px; color: #ffffff;">${isCurrency ? '¥' : ''}${formattedPrice}</strong> 
+                        <span style="color: ${color}; font-size: 11px; margin-left: 4px;">(${sign}${changePercent.toFixed(2)}%)</span>
+                    </div>`;
+            };
+            
+            let html = "";
+            html += getPriceHTML("USD/JPY", usdjpy, true);
+            html += getPriceHTML("NIKKEI 225", nikkei, false);
+            html += getPriceHTML("NY DOW", dow, false);
+            
+            marketContainer.innerHTML = html;
+            
+        } catch (e) {
+            console.error("Market Fetch Error:", e);
+            marketContainer.innerHTML = `<div style="color:#ffaa00; font-size:11px; padding: 5px;">[MARKET DATA OFFLINE: ${e.message}]</div>`;
         }
     }
 
