@@ -345,78 +345,79 @@ const cyberAlerts = [
 ];
 
     async function fetchNews() {
-        const listContainer = document.getElementById('news-list');
-        
-        // 🌸 【ここが今回の魔法！】ロード中に、10パターンからランダムで5行の英文を表示！
-        const randomIndex = Math.floor(Math.random() * cyberAlerts.length);
-        const randomMessage = cyberAlerts[randomIndex];
-        
-        // 改行（\n）をブラウザで綺麗に表示（<br>に置換）して、サイバーなフォントで配置
-        listContainer.innerHTML = `
-            <div class="loading" style="color: #cc66ff; font-family: monospace; white-space: pre-line; line-height: 1.4; font-size: 11px; text-align: left; padding: 5px; border-left: 2px dashed #bc00dd;">
-                ${randomMessage}
-            </div>`;
+    const listContainer = document.getElementById('news-list');
+    
+    // 🌸 【ここが今回の魔法！】31パターンからランダムで英文を表示！
+    const totalPatterns = typeof cyberAlerts !== 'undefined' ? cyberAlerts.length : 31;
+    const randomIndex = Math.floor(Math.random() * totalPatterns);
+    const randomMessage = cyberAlerts ? cyberAlerts[randomIndex] : "LOADING SYSTEM...";
+    
+    // 改行（\n）をブラウザで綺麗に表示（<br>に置換）して、サイバーなフォントで配置
+    listContainer.innerHTML = `
+        <div class="loading" style="color: #cc66ff; font-family: monospace; white-space: pre-line; line-height: 1.4; font-size: 11px; text-align: left; padding: 5px; border-left: 2px dashed #bc00dd;">
+            ${randomMessage}
+        </div>`;
 
-        try {
-            const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-            const res = await fetch(proxyUrl, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' },
-                cache: 'no-store'
-            });
+    try {
+        const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+        const res = await fetch(proxyUrl, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+        });
 
-            if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
-            const data = await res.json();
-            if (!data || !data.contents) throw new Error("Proxy returned no content");
+        const data = await res.json();
+        if (!data || !data.contents) throw new Error("Proxy returned no content");
 
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
 
-            const parseError = xmlDoc.querySelector('parsererror');
-            if (parseError) throw new Error("XML Parse Error");
+        const parseError = xmlDoc.querySelector('parsererror');
+        if (parseError) throw new Error("XML Parse Error");
 
-            const items = xmlDoc.querySelectorAll("item");
-            if (items.length === 0) throw new Error("No items found");
+        const items = xmlDoc.querySelectorAll("item");
+        if (items.length === 0) throw new Error("No items found");
 
-            let html = "";
-            const maxItems = Math.min(items.length, 12);
+        let html = "";
+        const maxItems = Math.min(items.length, 12);
 
-            for (let i = 0; i < maxItems; i++) {
-                const item = items[i];
-                let title = item.querySelector("title")?.textContent || "No Title";
-                const link = item.querySelector("link")?.textContent || "#";
+        for (let i = 0; i < maxItems; i++) {
+            const item = items[i];
+            let title = item.querySelector("title")?.textContent || "No Title";
+            const link = item.querySelector("link")?.textContent || "#";
 
-                title = title.split(' - ')[0].trim();
+            title = title.split(' - ')[0].trim();
 
-                html += `
-                    <a href="${link}" target="_blank" class="news-item" title="${title}">
-                        ▶ ${title}
-                    </a>`;
-            }
-
-            listContainer.innerHTML = html;
-
-        } catch (e) {
-            console.error("News Fetch Error:", e);
-            listContainer.innerHTML = `
-                <div style="color:#ff6666; font-size:12px; padding:10px; line-height:1.5;">
-                    [SYSTEM ALERT] NEWS FEED OFFLINE<br>
-                    REASON: ${e.message}<br>
-                    <span style="font-size:11px; opacity:0.7;">SYSTEM WILL RETRY IN 10 SECONDS</span>
-                </div>`;
-            
-            setTimeout(fetchNews, 10000);
+            html += `
+                <a href="${link}" target="_blank" class="news-item" title="${title}">
+                    ▶ ${title}
+                </a>`;
         }
-    }
 
-    // 初回実行
-    window.onload = () => {
-        fetchNews();
-        // 10分ごとに更新（15分→10分に短縮）
-        setInterval(fetchNews, 10 * 60 * 1000);
-    };
+        listContainer.innerHTML = html;
+
+    } catch (e) {
+        console.error("News Fetch Error:", e);
+        listContainer.innerHTML = `
+            <div style="color:#ff6666; font-size:12px; padding:10px; line-height:1.5;">
+                [SYSTEM ALERT] NEWS FEED OFFLINE<br>
+                REASON: ${e.message}<br>
+                <span style="font-size:11px; opacity:0.7;">SYSTEM WILL RETRY IN 10 SECONDS</span>
+            </div>`;
+        
+        setTimeout(fetchNews, 10000);
+    }
+}
+
+// 初回実行
+window.onload = () => {
+    fetchNews();
+    // 10分ごとに更新（15分→10分に短縮）
+    setInterval(fetchNews, 10 * 60 * 1000);
+};
 </script>
 
 </body>
