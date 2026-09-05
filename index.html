@@ -167,6 +167,45 @@
             50% { opacity: 0.7; }
             100% { opacity: 0.2; }
         }
+
+/* 🌸 リアルタイム株価テロップ（Ticker）のスタイリング */
+.stock-ticker-wrapper {
+    width: 100%;
+    background: rgba(0, 15, 35, 0.9);
+    border-top: 1px solid rgba(0, 242, 254, 0.4);
+    border-bottom: 1px solid rgba(0, 242, 254, 0.4);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 4px 0;
+    box-sizing: border-box;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+}
+
+.stock-ticker-content {
+    display: inline-block;
+    white-space: nowrap;
+    animation: ticker-scroll 30s linear infinite;
+}
+
+.stock-ticker-content:hover {
+    animation-play-state: paused; /* マウスホバーで一時停止できる優しさ！ */
+}
+
+.stock-ticker-item {
+    display: inline-block;
+    margin-right: 25px;
+    color: #e0f7ff;
+}
+
+.ticker-up { color: #00ff88; font-weight: bold; }
+.ticker-down { color: #ff3b30; font-weight: bold; }
+
+@keyframes ticker-scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
     </style>
 </head>
 <body>
@@ -179,8 +218,8 @@
         <div style="font-size: 12px; margin-bottom: 20px; line-height: 1.8;">
             [INDEX]<br>
             - <a href="#section1" style="color:#00f2fe;">MAIN STREAM</a><br>
-            - <a href="#section2" style="color:#00f2fe;">ENTERTAINMENT</a><br>
             - <a href="#section5" style="color:#00f2fe;">STOCK PRICE</a><br>
+            - <a href="#section2" style="color:#00f2fe;">ENTERTAINMENT</a><br>
             - <a href="#section3" style="color:#00f2fe;">SPORTS</a><br>
             - <a href="#section4" style="color:#00f2fe;">RESOURCES</a>
         </div>
@@ -203,26 +242,6 @@
             <a href="https://news.yahoo.co.jp/" target="_blank" class="icon-link play-sound" data-sound="click">
                 <img src="https://socrarius-tool.com/news/icon5.png">
             </a>
-        </div> 
-
-        <!-- ENTERTAINMENT セクション -->
-        <div class="section-title" id="section2">ENTERTAINMENT</div>
-        <div class="gallery">
-            <a href="https://www.imdb.com/" target="_blank" class="icon-link play-sound" data-sound="click">
-                <img src="https://socrarius-tool.com/news/icon6.png">
-            </a>
-            <a href="https://animatetimes.com/" target="_blank" class="icon-link play-sound" data-sound="click">
-                <img src="https://socrarius-tool.com/news/icon7.png">
-            </a>
-            <a href="https://www.oricon.co.jp/" target="_blank" class="icon-link play-sound" data-sound="click">
-                <img src="https://socrarius-tool.com/news/icon8.png">
-            </a>
-            <a href="https://natalie.mu/" target="_blank" class="icon-link play-sound" data-sound="click">
-                <img src="https://socrarius-tool.com/news/icon9.png">
-            </a>
-            <a href="https://www.4gamer.net/" target="_blank" class="icon-link play-sound" data-sound="click">
-                <img src="https://socrarius-tool.com/news/icon10.png">
-            </a>
         </div> <!-- ここでまとめて閉じるのが正解です🌸 -->
 
          <!-- STOCK PRICE セクション -->
@@ -243,7 +262,27 @@
             <a href="https://finance.yahoo.co.jp/quote/998407.O/chart" target="_blank" class="icon-link play-sound" data-sound="click">
                 <img src="https://socrarius-tool.com/news/icon19.png">
             </a>
-        </div> <!-- ここでまとめて閉じるのが正解です🌸 -->
+        </div> 
+
+        <!-- ENTERTAINMENT セクション -->
+        <div class="section-title" id="section2">ENTERTAINMENT</div>
+        <div class="gallery">
+            <a href="https://www.imdb.com/" target="_blank" class="icon-link play-sound" data-sound="click">
+                <img src="https://socrarius-tool.com/news/icon6.png">
+            </a>
+            <a href="https://animatetimes.com/" target="_blank" class="icon-link play-sound" data-sound="click">
+                <img src="https://socrarius-tool.com/news/icon7.png">
+            </a>
+            <a href="https://www.oricon.co.jp/" target="_blank" class="icon-link play-sound" data-sound="click">
+                <img src="https://socrarius-tool.com/news/icon8.png">
+            </a>
+            <a href="https://natalie.mu/" target="_blank" class="icon-link play-sound" data-sound="click">
+                <img src="https://socrarius-tool.com/news/icon9.png">
+            </a>
+            <a href="https://www.4gamer.net/" target="_blank" class="icon-link play-sound" data-sound="click">
+                <img src="https://socrarius-tool.com/news/icon10.png">
+            </a>
+        </div> 
 
         <!-- SPORTS セクション -->
         <div class="section-title" id="section3">SPORTS</div>
@@ -269,18 +308,27 @@
     </div> <!-- left-contentの閉じ -->
 
         <!-- 右側：最新ニュース情報 -->
-    <div class="right-content">
-        <!-- ニュース側にはidは不要なので削除してスッキリ！🌸 -->
-        <div class="section-title2">SYSTEM CALL: TOP HEADLINES</div> 
+<div class="right-content">
+    <div class="section-title2">SYSTEM CALL: TOP HEADLINES</div> 
 
-         <img src="https://socrarius-tool.com/news/banner1.png"> 
-         <br>
-        <div id="news-terminal">
-            <div id="news-list" class="news-container">
-                <div class="loading">Scanning Global News Waves...</div>
-            </div>
+    <img src="https://socrarius-tool.com/news/banner1.png"> 
+    <br>
+
+    <!-- 🌸 株価テロップ枠をニュース端末の上に固定配置！ -->
+    <div id="stock-ticker-bar" style="width: 100%; background: rgba(0, 15, 30, 0.8); border-top: 1px solid rgba(0, 242, 254, 0.3); border-bottom: 1px solid rgba(0, 242, 254, 0.3); margin: 8px 0; padding: 8px 0; overflow: hidden; white-space: nowrap;">
+        <div id="stock-ticker-content" style="display: inline-block; white-space: nowrap; animation: ticker-scroll 25s linear infinite;">
+            <span style="color: #00f2fe; font-family: monospace; font-size: 14px;">
+                CONNECTING TO FINANCIAL NETWORK...
+            </span>
         </div>
     </div>
+
+    <div id="news-terminal">
+        <div id="news-list" class="news-container">
+            <div class="loading">Scanning Global News Waves...</div>
+        </div>
+    </div>
+</div>
 </div> <!-- main-layoutの閉じ -->
 
 <script>
@@ -349,15 +397,68 @@ const cyberAlerts = [
     `[FINAL SYSTEM BROADCAST: SOCRARIUS AWAKENS]\nGLOBAL SYNC COMPLETE: THE FLOATING WORLD OF SOCRARIUS IS STABILIZED AT MAXIMUM COHERENCE.\nTHE GATES TO THE UNKNOWN SECTORS ARE WIDE OPEN FOR THOSE BRAVE ENOUGH TO ENTER.\nREMEMBER: EVERY CHOICE YOU MAKE SHAPES THE REALITY AROUND YOU.\nADVENTURERS, YOUR STORY IS ONLY JUST BEGINNING.\nPREPARE YOUR BLADES, DEAR TRAVELERS. THE TOWER CALLS.`
 ];
 
-    async function fetchNews() {
+   // 🌸 1. リアルタイム株価データを取得してテロップ化する魔法
+// 🌸 株価テロップのみを更新する関数
+async function fetchStockTickerData() {
+    const tickerContent = document.getElementById("stock-ticker-content");
+    if (!tickerContent) return;
+
+    try {
+        const targetApi = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=^N225,^DJI,^IXIC,USDJPY=X';
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetApi)}`;
+        
+        const res = await fetch(proxyUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error("Proxy Error");
+        
+        const proxyData = await res.json();
+        if (!proxyData || !proxyData.contents) throw new Error("No Contents");
+        
+        const data = JSON.parse(proxyData.contents);
+        const quotes = data.quoteResponse.result;
+        let tickerHtml = "";
+
+        quotes.forEach(q => {
+            let name = q.shortName || q.symbol;
+            if (q.symbol === "^N225") name = "日経平均";
+            if (q.symbol === "^DJI") name = "NYダウ";
+            if (q.symbol === "^IXIC") name = "NASDAQ";
+            if (q.symbol === "USDJPY=X") name = "USD/JPY";
+
+            const price = q.regularMarketPrice ? q.regularMarketPrice.toLocaleString('en-US', { minimumFractionDigits: 2 }) : "--";
+            const changePercent = q.regularMarketChangePercent ? q.regularMarketChangePercent.toFixed(2) : "0.00";
+            const isUp = q.regularMarketChangePercent >= 0;
+            const colorStyle = isUp ? "color: #00ff88; font-weight: bold;" : "color: #ff3b30; font-weight: bold;";
+            const arrow = isUp ? "▲" : "▼";
+
+            tickerHtml += `
+                <span style="display: inline-block; margin-right: 30px; font-family: monospace; font-size: 11px;">
+                    <span style="color: #00f2fe; margin-right: 6px;">[ ${name} ]</span>
+                    <span style="color: #ffffff; font-weight: bold;">${price}</span>
+                    <span style="${colorStyle} margin-left: 6px;">${arrow} ${changePercent}%</span>
+                </span>
+            `;
+        });
+
+        tickerContent.innerHTML = tickerHtml;
+    } catch (err) {
+        // 取得失敗時は安全なメッセージをテロップ内で流す
+        tickerContent.innerHTML = `
+            <span style="color: #00f2fe; font-family: monospace; font-size: 14px;">
+                CURRENTLY RETRIEVING STOCK PRICE INFORMATION. PLEASE WAIT A MOMENT.
+            </span>
+        `;
+    }
+}
+
+// 🌸 ニュースのみを更新する関数（株価生成コードを削除して純粋化！）
+async function fetchNews() {
     const listContainer = document.getElementById('news-list');
+    if (!listContainer) return;
     
-    // 🌸 【ここが今回の魔法！】31パターンからランダムで英文を表示！
     const totalPatterns = typeof cyberAlerts !== 'undefined' ? cyberAlerts.length : 31;
     const randomIndex = Math.floor(Math.random() * totalPatterns);
-    const randomMessage = cyberAlerts ? cyberAlerts[randomIndex] : "LOADING SYSTEM...";
+    const randomMessage = (typeof cyberAlerts !== 'undefined' && cyberAlerts[randomIndex]) ? cyberAlerts[randomIndex] : "LOADING SYSTEM...";
     
-    // 改行（\n）をブラウザで綺麗に表示（<br>に置換）して、サイバーなフォントで配置
     listContainer.innerHTML = `
         <div class="loading" style="color: #cc66ff; font-family: monospace; white-space: pre-line; line-height: 1.4; font-size: 11px; text-align: left; padding: 5px; border-left: 2px dashed #bc00dd;">
             ${randomMessage}
@@ -366,11 +467,7 @@ const cyberAlerts = [
     try {
         const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        const res = await fetch(proxyUrl, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' },
-            cache: 'no-store'
-        });
+        const res = await fetch(proxyUrl, { method: 'GET', headers: { 'Accept': 'application/json' }, cache: 'no-store' });
 
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
@@ -379,10 +476,6 @@ const cyberAlerts = [
 
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-
-        const parseError = xmlDoc.querySelector('parsererror');
-        if (parseError) throw new Error("XML Parse Error");
-
         const items = xmlDoc.querySelectorAll("item");
         if (items.length === 0) throw new Error("No items found");
 
@@ -393,7 +486,6 @@ const cyberAlerts = [
             const item = items[i];
             let title = item.querySelector("title")?.textContent || "No Title";
             const link = item.querySelector("link")?.textContent || "#";
-
             title = title.split(' - ')[0].trim();
 
             html += `
@@ -402,6 +494,7 @@ const cyberAlerts = [
                 </a>`;
         }
 
+        // 純粋にニュース部分のみを差し替え！
         listContainer.innerHTML = html;
 
     } catch (e) {
@@ -417,26 +510,14 @@ const cyberAlerts = [
     }
 }
 
-// 初回実行
+// 🌸 起動処理 
 window.onload = () => {
     fetchNews();
-    // 10分ごとに更新（15分→10分に短縮）
-    setInterval(fetchNews, 10 * 60 * 1000);
+    fetchStockTickerData();
+    
+    setInterval(fetchNews, 10 * 60 * 1000);        // ニュースは10分ごと
+    setInterval(fetchStockTickerData, 1 * 60 * 1000); // 株価は1分ごとに自動更新！
 };
-
-          //3. 音を鳴らすJavaScript（HTMLを増やしてもこのまま共通で使える）
-    const soundLinks = document.querySelectorAll('.play-sound');
-    soundLinks.forEach(link => {
-    link.addEventListener('click', () => {
-    const soundId = link.getAttribute('data-sound');
-    const audio = document.getElementById(soundId);
-    if (audio) {
-    audio.currentTime = 0;
-    audio.play().catch(e => console.log("Audio play blocked:", e));
-    }
-    });
-    });
-
 </script>
 
 </body>
