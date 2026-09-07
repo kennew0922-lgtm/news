@@ -402,54 +402,44 @@ const cyberAlerts = [
 
    // 🌸 1. リアルタイム株価データを取得してテロップ化する魔法
 // 🌸 株価テロップのみを更新する関数
+// 🛠️ 方針変更　Yahooを捨てて、Stooq から取る。（天才？スティーブさんアイコンはこれに決まり）
+// 🛠️🛠️  再度方針変更　Cloudflare Worker経由　🛠️🛠️ 
 async function fetchStockTickerData() {
     const tickerContent = document.getElementById("stock-ticker-content");
     if (!tickerContent) return;
 
     try {
-        const targetApi = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=^N225,^DJI,^IXIC,USDJPY=X';
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetApi)}`;
-        
-        const res = await fetch(proxyUrl, { cache: 'no-store' });
-        if (!res.ok) throw new Error("Proxy Error");
-        
-        const proxyData = await res.json();
-        if (!proxyData || !proxyData.contents) throw new Error("No Contents");
-        
-        const data = JSON.parse(proxyData.contents);
-        const quotes = data.quoteResponse.result;
+        const res = await fetch("https://socrarius-stock.kennew0922.workers.dev", { cache: "no-store" });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "Worker Error");
+
         let tickerHtml = "";
-
-        quotes.forEach(q => {
-            let name = q.shortName || q.symbol;
-            if (q.symbol === "^N225") name = "日経平均";
-            if (q.symbol === "^DJI") name = "NYダウ";
-            if (q.symbol === "^IXIC") name = "NASDAQ";
-            if (q.symbol === "USDJPY=X") name = "USD/JPY";
-
-            const price = q.regularMarketPrice ? q.regularMarketPrice.toLocaleString('en-US', { minimumFractionDigits: 2 }) : "--";
-            const changePercent = q.regularMarketChangePercent ? q.regularMarketChangePercent.toFixed(2) : "0.00";
-            const isUp = q.regularMarketChangePercent >= 0;
-            const colorStyle = isUp ? "color: #00ff88; font-weight: bold;" : "color: #ff3b30; font-weight: bold;";
+        data.quotes.forEach(q => {
+            const price = (q.price != null)
+                ? Number(q.price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "--";
+            const changePercent = Number(q.changePercent || 0).toFixed(2);
+            const isUp = Number(changePercent) >= 0;
+            const colorStyle = isUp
+                ? "color:#00ff88;font-weight:bold;"
+                : "color:#ff3b30;font-weight:bold;";
             const arrow = isUp ? "▲" : "▼";
 
             tickerHtml += `
-                <span style="display: inline-block; margin-right: 30px; font-family: monospace; font-size: 11px;">
-                    <span style="color: #00f2fe; margin-right: 6px;">[ ${name} ]</span>
-                    <span style="color: #ffffff; font-weight: bold;">${price}</span>
-                    <span style="${colorStyle} margin-left: 6px;">${arrow} ${changePercent}%</span>
-                </span>
-            `;
+                <span style="display:inline-block;margin-right:30px;font-family:monospace;font-size:14px;">
+                    <span style="color:#00f2fe;margin-right:6px;">[ ${q.name} ]</span>
+                    <span style="color:#ffffff;font-weight:bold;">${price}</span>
+                    <span style="${colorStyle} margin-left:6px;">${arrow} ${changePercent}%</span>
+                </span>`;
         });
 
         tickerContent.innerHTML = tickerHtml;
     } catch (err) {
-        // 取得失敗時は安全なメッセージをテロップ内で流す
+        console.error("Stock Fetch Error:", err);
         tickerContent.innerHTML = `
-            <span style="color: #00f2fe; font-family: monospace; font-size: 14px;">
+            <span style="color:#00f2fe;font-family:monospace;font-size:16px;">
                 CURRENTLY RETRIEVING STOCK PRICE INFORMATION. PLEASE WAIT A MOMENT.
-            </span>
-        `;
+            </span>`;
     }
 }
 
