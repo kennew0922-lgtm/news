@@ -498,6 +498,19 @@ window.onload = () => {
     setInterval(fetchNews, 10 * 60 * 1000);        // ニュースは10分ごと
     setInterval(fetchStockTickerData, 1 * 60 * 1000); // 株価は1分ごとに自動更新！
 };
+
+ //3. 音を鳴らすJavaScript（HTMLを増やしてもこのまま共通で使える）
+    const soundLinks = document.querySelectorAll('.play-sound');
+    soundLinks.forEach(link => {
+    link.addEventListener('click', () => {
+    const soundId = link.getAttribute('data-sound');
+    const audio = document.getElementById(soundId);
+    if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(e => console.log("Audio play blocked:", e));
+    }
+    });
+    });
 </script>
 
 </body>
