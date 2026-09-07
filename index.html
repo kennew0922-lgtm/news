@@ -402,14 +402,14 @@ const cyberAlerts = [
 
    // 🌸 1. リアルタイム株価データを取得してテロップ化する魔法
 // 🌸 株価テロップのみを更新する関数
-// 🛠️ 方針変更　Yahooを捨てて、Stooq から取る。（天才？スティーブさんアイコンはこれに決まり）
+// 🛠️ 方針変更　Yahooを捨てて、Stooq から取る。（天才？スティーブさんアイコン🛠️はこれに決まり）
 // 🛠️🛠️  再度方針変更　Cloudflare Worker経由　🛠️🛠️ 
 async function fetchStockTickerData() {
     const tickerContent = document.getElementById("stock-ticker-content");
     if (!tickerContent) return;
 
     try {
-        const res = await fetch("https://socrarius-stock.kennew0922.workers.dev", { cache: "no-store" });
+        const res = await fetch("https://socrarius-stock.kennew0922.workers.dev", { cache: "no-store" });//ここにCloudflare WorkerでビルドしたURL
         const data = await res.json();
         if (!data.ok) throw new Error(data.error || "Worker Error");
 
@@ -457,38 +457,25 @@ async function fetchNews() {
             ${randomMessage}
         </div>`;
 
+// 🛠️ここだけスティーブさんのコードに差し替え　🪐コード確認して重要部分消えてたから……
     try {
-        const targetUrl = 'https://news.google.com/rss/headlines?hl=ja&gl=JP&ceid=JP:ja';
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        const res = await fetch(proxyUrl, { method: 'GET', headers: { 'Accept': 'application/json' }, cache: 'no-store' });
-
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-
+        const res = await fetch("https://socrarius-stock.kennew0922.workers.dev/news", { cache: "no-store" });
         const data = await res.json();
-        if (!data || !data.contents) throw new Error("Proxy returned no content");
-
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-        const items = xmlDoc.querySelectorAll("item");
-        if (items.length === 0) throw new Error("No items found");
+        if (!data.ok) throw new Error(data.error || "Worker Error");
 
         let html = "";
-        const maxItems = Math.min(items.length, 12);
-
-        for (let i = 0; i < maxItems; i++) {
-            const item = items[i];
-            let title = item.querySelector("title")?.textContent || "No Title";
-            const link = item.querySelector("link")?.textContent || "#";
-            title = title.split(' - ')[0].trim();
-
+        data.items.forEach(item => {
             html += `
-                <a href="${link}" target="_blank" class="news-item" title="${title}">
-                    ▶ ${title}
+                <a href="${item.link}" target="_blank" class="news-item" title="${item.title}">
+                    ▶ ${item.title}
                 </a>`;
-        }
+        });
+        listContainer.innerHTML = html;
 
         // 純粋にニュース部分のみを差し替え！
         listContainer.innerHTML = html;
+
+//🪐↑ここまで差し替えた　↓は前のまま、ここも少し消えてた。チェック大事。
 
     } catch (e) {
         console.error("News Fetch Error:", e);
